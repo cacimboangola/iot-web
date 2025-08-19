@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 /**
  * Service class para centralizar todas as chamadas à API do Blynk Cloud
@@ -17,8 +17,8 @@ class BlynkService
 
     public function __construct()
     {
-        $this->baseUrl = config('services.blynk.base_url');
-        $this->authToken = config('services.blynk.auth_token');
+        $this->baseUrl = env('BLYNK_API_URL', 'https://blynk.cloud');
+        $this->authToken = env('BLYNK_AUTH_TOKEN', 'XDMd-ylA4lL9DcNZeNhZjBgdNPZmzOSh');
     }
 
     /**
