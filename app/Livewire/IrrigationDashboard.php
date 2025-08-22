@@ -45,13 +45,18 @@ class IrrigationDashboard extends Component
      */
     private function getSimulatedData(): array
     {
+        $airTemp = rand(18, 35);
+        $soilHumidity = rand(20, 80);
+        
         return [
-            'soil_humidity' => rand(20, 80),
-            'air_temperature' => rand(18, 35),
+            'soil_humidity' => $soilHumidity,
+            'air_temperature' => $airTemp,
             'air_humidity' => rand(40, 90),
             'luminosity' => rand(0, 100),
             'pump_status' => (bool) rand(0, 1),
             'auto_mode_status' => (bool) rand(0, 1),
+            'fan_status' => $airTemp > 28 || rand(0, 1),
+            'solenoid_valve_status' => $soilHumidity < 40 || rand(0, 1),
             'timestamp' => now()->toISOString(),
         ];
     }

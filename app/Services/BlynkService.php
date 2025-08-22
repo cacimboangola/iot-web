@@ -78,6 +78,26 @@ class BlynkService
     }
 
     /**
+     * Lê o estado do ventilador (V9)
+     * @return bool|null Estado do ventilador (true = ligado, false = desligado)
+     */
+    public function getFanStatus(): ?bool
+    {
+        $value = $this->getSensorValue('V9');
+        return $value !== null ? (bool) $value : null;
+    }
+
+    /**
+     * Lê o estado da válvula solenoide (V10)
+     * @return bool|null Estado da válvula (true = aberta, false = fechada)
+     */
+    public function getSolenoidValveStatus(): ?bool
+    {
+        $value = $this->getSensorValue('V10');
+        return $value !== null ? (bool) $value : null;
+    }
+
+    /**
      * Liga a bomba de irrigação
      * @return bool Sucesso da operação
      */
@@ -114,6 +134,42 @@ class BlynkService
     }
 
     /**
+     * Liga o ventilador
+     * @return bool Sucesso da operação
+     */
+    public function turnFanOn(): bool
+    {
+        return $this->updatePin('V7', 1);
+    }
+
+    /**
+     * Desliga o ventilador
+     * @return bool Sucesso da operação
+     */
+    public function turnFanOff(): bool
+    {
+        return $this->updatePin('V7', 0);
+    }
+
+    /**
+     * Abre a válvula solenoide
+     * @return bool Sucesso da operação
+     */
+    public function openSolenoidValve(): bool
+    {
+        return $this->updatePin('V8', 1);
+    }
+
+    /**
+     * Fecha a válvula solenoide
+     * @return bool Sucesso da operação
+     */
+    public function closeSolenoidValve(): bool
+    {
+        return $this->updatePin('V8', 0);
+    }
+
+    /**
      * Obtém todos os dados dos sensores de uma vez
      * @return array Array com todos os valores dos sensores
      */
@@ -126,6 +182,8 @@ class BlynkService
             'luminosity' => $this->getLuminosity(),
             'pump_status' => $this->getPumpStatus(),
             'auto_mode_status' => $this->getAutoModeStatus(),
+            'fan_status' => $this->getFanStatus(),
+            'solenoid_valve_status' => $this->getSolenoidValveStatus(),
             'timestamp' => now()->toISOString(),
         ];
     }

@@ -73,6 +73,12 @@ class IrrigationDataSeeder extends Seeder
         // Modo automático - aleatório mas tendendo a estar ativo
         $autoModeStatus = rand(1, 10) <= 7; // 70% de chance de estar ativo
         
+        // Status do ventilador - baseado na temperatura (liga quando quente)
+        $fanStatus = $airTemperature > 28 || rand(1, 10) <= 3; // Liga se temp > 28°C ou 30% chance aleatória
+        
+        // Status da válvula solenoide - baseado na humidade do solo (abre quando seco)
+        $solenoidValveStatus = $soilHumidity < 40 || rand(1, 10) <= 2; // Abre se humidade < 40% ou 20% chance aleatória
+        
         return [
             'soil_humidity' => round($soilHumidity, 1),
             'air_temperature' => round($airTemperature, 1),
@@ -80,6 +86,8 @@ class IrrigationDataSeeder extends Seeder
             'luminosity' => round($luminosity, 1),
             'pump_status' => $pumpStatus,
             'auto_mode_status' => $autoModeStatus,
+            'fan_status' => $fanStatus,
+            'solenoid_valve_status' => $solenoidValveStatus,
             'timestamp' => now()->toISOString(),
             'simulated' => true,
             'generated_at' => now()->format('Y-m-d H:i:s'),
@@ -122,6 +130,8 @@ class IrrigationDataSeeder extends Seeder
                 ['Luminosidade', $data['luminosity'], '%', '📊 Normal'],
                 ['Bomba', $data['pump_status'] ? 'Ligada' : 'Desligada', '-', $data['pump_status'] ? '🟢 ON' : '🔴 OFF'],
                 ['Modo Automático', $data['auto_mode_status'] ? 'Ativo' : 'Inativo', '-', $data['auto_mode_status'] ? '🤖 AUTO' : '👤 MANUAL'],
+                ['Ventilador', $data['fan_status'] ? 'Ligado' : 'Desligado', '-', $data['fan_status'] ? '🌀 ON' : '⭕ OFF'],
+                ['Válvula Solenoide', $data['solenoid_valve_status'] ? 'Aberta' : 'Fechada', '-', $data['solenoid_valve_status'] ? '🔓 OPEN' : '🔒 CLOSED'],
             ]
         );
         

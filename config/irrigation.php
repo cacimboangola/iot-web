@@ -74,5 +74,33 @@ return [
             'status_pin' => 'V5',
             'name' => 'Modo Automático',
         ],
+        'fan' => [
+            'control_pin' => 'V7',
+            'status_pin' => 'V9',
+            'name' => 'Ventilador',
+        ],
+        'solenoid_valve' => [
+            'control_pin' => 'V8',
+            'status_pin' => 'V10',
+            'name' => 'Válvula Solenoide',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Configurações de Notificações por Email
+    |--------------------------------------------------------------------------
+    */
+    'notifications' => [
+        'email' => env('NOTIFICATION_EMAIL', null),
+        'enabled' => env('NOTIFICATIONS_ENABLED', true),
+        'events' => [
+            'pump_on' => env('NOTIFY_PUMP_ON', true),
+            'pump_off' => env('NOTIFY_PUMP_OFF', true),
+            'fan_on' => env('NOTIFY_FAN_ON', true),
+            'fan_off' => env('NOTIFY_FAN_OFF', true),
+            'valve_open' => env('NOTIFY_VALVE_OPEN', true),
+            'valve_close' => env('NOTIFY_VALVE_CLOSE', true),
+        ],
     ],
 ];

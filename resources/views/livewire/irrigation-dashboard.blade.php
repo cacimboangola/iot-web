@@ -84,7 +84,7 @@
     </div>
 
     <!-- Controles -->
-    <div class="row g-4">
+    <div class="row g-4 mb-4">
         <!-- Controle da Bomba -->
         <div class="col-lg-6">
             <div class="card h-100">
@@ -114,6 +114,43 @@
                 <div class="card-body">
                     <livewire:auto-mode-control 
                         :autoModeStatus="$sensorData['auto_mode_status'] ?? false"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Novos Controles de Atuadores -->
+    <div class="row g-4">
+        <!-- Controle do Ventilador -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-fan me-2"></i>
+                        Controle do Ventilador
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <livewire:fan-control 
+                        :fanStatus="$sensorData['fan_status'] ?? false"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <!-- Controle da Válvula Solenoide -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-unlock-fill me-2"></i>
+                        Controle da Válvula
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <livewire:solenoid-valve-control 
+                        :valveStatus="$sensorData['solenoid_valve_status'] ?? false"
                     />
                 </div>
             </div>

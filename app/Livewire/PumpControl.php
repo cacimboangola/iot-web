@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Services\BlynkService;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
 /**
@@ -42,6 +43,9 @@ class PumpControl extends Component
                 $this->pumpStatus = !$this->pumpStatus;
                 $this->lastAction = "Bomba {$action} às " . now()->format('H:i:s');
                 
+                // Envia notificação por email
+                $this->sendEmailNotification($action);
+                
                 // Dispara evento para atualizar dashboard
                 $this->dispatch('refresh-sensors');
                 
@@ -70,6 +74,29 @@ class PumpControl extends Component
     public function getButtonText(): string
     {
         return $this->pumpStatus ? 'Desligar Bomba' : 'Ligar Bomba';
+    }
+
+    /**
+     * Envia notificação por email sobre mudança de estado da bomba
+     */
+    private function sendEmailNotification(string $action): void
+    {
+        try {
+            $emailTo = config('irrigation.notification_email', env('NOTIFICATION_EMAIL'));
+            
+            if ($emailTo) {
+                Mail::raw(
+                    "A bomba de irrigação foi {$action} às " . now()->format('d/m/Y H:i:s') . "\n\n" .
+                    "Sistema de Irrigação Inteligente IoT",
+                    function ($message) use ($emailTo, $action) {
+                        $message->to($emailTo)
+                                ->subject("Bomba de Irrigação {$action} - Sistema IoT");
+                    }
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::error('Erro ao enviar email de notificação da bomba: ' . $e->getMessage());
+        }
     }
 
     /**

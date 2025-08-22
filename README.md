@@ -15,23 +15,26 @@ Sistema web completo para monitoramento e controle de irrigação inteligente ba
 ### 🎯 Funcionalidades Principais
 
 - **Dashboard em Tempo Real**: Monitoramento de todos os sensores com atualização automática
-- **Controle Remoto**: Liga/desliga bomba de irrigação via interface web
+- **Controle Remoto**: Liga/desliga bomba, ventilador e válvula solenoide via interface web
 - **Modo Automático**: Irrigação baseada em limiares configuráveis de humidade
+- **Notificações por Email**: Alertas automáticos quando atuadores são ligados/desligados
 - **Interface Responsiva**: Design moderno com Bootstrap 5 e ícones
 - **Configurações Avançadas**: Página dedicada para ajustar parâmetros do sistema
 - **API RESTful**: Endpoints para integração com outros sistemas
 - **Dados Simulados**: Seeder para desenvolvimento sem hardware físico
 
-### 📊 Sensores Monitorados
+### 📊 Sensores e Atuadores Monitorados
 
-| Sensor | Pin Virtual | Descrição | Unidade |
-|--------|-------------|-----------|----------|
+| Sensor/Atuador | Pin Virtual | Descrição | Unidade |
+|----------------|-------------|-----------|----------|
 | 🌱 Humidade do Solo | V0 | Sensor de humidade do solo | % |
 | 🌡️ Temperatura do Ar | V1 | Sensor de temperatura ambiente | °C |
 | 💧 Humidade do Ar | V2 | Sensor de humidade relativa do ar | % |
 | ☀️ Luminosidade | V6 | Sensor LDR de luminosidade | % |
 | ⚡ Bomba de Irrigação | V3/V4 | Controle e status da bomba | ON/OFF |
 | 🤖 Modo Automático | V5 | Status do modo automático | ON/OFF |
+| 🌀 Ventilador | V7/V9 | Controle e status do ventilador | ON/OFF |
+| 🔧 Válvula Solenoide | V8/V10 | Controle e status da válvula | OPEN/CLOSED |
 
 ## 🚀 Instalação e Configuração
 
@@ -87,6 +90,16 @@ BLYNK_AUTH_TOKEN=SEU_TOKEN_AQUI
 IRRIGATION_HUMIDITY_THRESHOLD=30
 IRRIGATION_POLLING_INTERVAL=5000
 
+# Notificações por Email
+NOTIFICATION_EMAIL=your-email@example.com
+NOTIFICATIONS_ENABLED=true
+NOTIFY_PUMP_ON=true
+NOTIFY_PUMP_OFF=true
+NOTIFY_FAN_ON=true
+NOTIFY_FAN_OFF=true
+NOTIFY_VALVE_OPEN=true
+NOTIFY_VALVE_CLOSE=true
+
 # Banco de Dados (SQLite por padrão)
 DB_CONNECTION=sqlite
 DB_DATABASE=/caminho/absoluto/para/database.sqlite
@@ -124,6 +137,10 @@ ESP32 Pinout:
 ├── GPIO 22 → DHT22 (Temperatura e Humidade do Ar)
 ├── GPIO 35 → LDR (Sensor de Luminosidade)
 ├── GPIO 2  → Relé da Bomba de Irrigação
+├── GPIO 4  → Relé do Ventilador
+├── GPIO 5  → Relé da Válvula Solenoide
+├── GPIO 18 → LED Status Ventilador
+├── GPIO 19 → LED Status Válvula Solenoide
 └── 3.3V/GND → Alimentação dos sensores
 ```
 
@@ -147,6 +164,10 @@ const char* password = "SUA_SENHA";
 #define SOIL_PIN 34
 #define LDR_PIN 35
 #define PUMP_PIN 2
+#define FAN_PIN 4
+#define VALVE_PIN 5
+#define FAN_STATUS_PIN 18
+#define VALVE_STATUS_PIN 19
 
 DHT dht(DHT_PIN, DHT22);
 
@@ -155,6 +176,10 @@ void setup() {
   
   // Configuração dos pinos
   pinMode(PUMP_PIN, OUTPUT);
+  pinMode(FAN_PIN, OUTPUT);
+  pinMode(VALVE_PIN, OUTPUT);
+  pinMode(FAN_STATUS_PIN, OUTPUT);
+  pinMode(VALVE_STATUS_PIN, OUTPUT);
   
   // Inicialização
   dht.begin();
@@ -185,8 +210,14 @@ void sendSensorData() {
   int ldrValue = analogRead(LDR_PIN);
   float luminosity = map(ldrValue, 0, 4095, 0, 100);
   
-  // Status da bomba
+  // Status dos atuadores
   bool pumpStatus = digitalRead(PUMP_PIN);
+  bool fanStatus = digitalRead(FAN_PIN);
+  bool valveStatus = digitalRead(VALVE_PIN);
+  
+  // Atualiza LEDs de status
+  digitalWrite(FAN_STATUS_PIN, fanStatus);
+  digitalWrite(VALVE_STATUS_PIN, valveStatus);
   
   // Envio para Blynk
   Blynk.virtualWrite(V0, soilHumidity);
@@ -194,12 +225,26 @@ void sendSensorData() {
   Blynk.virtualWrite(V2, airHumidity);
   Blynk.virtualWrite(V4, pumpStatus);
   Blynk.virtualWrite(V6, luminosity);
+  Blynk.virtualWrite(V9, fanStatus);
+  Blynk.virtualWrite(V10, valveStatus);
 }
 
 // Controle da bomba via Blynk
 BLYNK_WRITE(V3) {
   int value = param.asInt();
   digitalWrite(PUMP_PIN, value);
+}
+
+// Controle do ventilador via Blynk
+BLYNK_WRITE(V7) {
+  int value = param.asInt();
+  digitalWrite(FAN_PIN, value);
+}
+
+// Controle da válvula solenoide via Blynk
+BLYNK_WRITE(V8) {
+  int value = param.asInt();
+  digitalWrite(VALVE_PIN, value);
 }
 ```
 
