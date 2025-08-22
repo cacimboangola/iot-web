@@ -65,22 +65,8 @@ class FanControl extends Component
      */
     private function sendEmailNotification(string $action): void
     {
-        try {
-            $emailTo = config('irrigation.notification_email', env('NOTIFICATION_EMAIL'));
-            
-            if ($emailTo) {
-                Mail::raw(
-                    "O ventilador foi {$action} às " . now()->format('d/m/Y H:i:s') . "\n\n" .
-                    "Sistema de Irrigação Inteligente IoT",
-                    function ($message) use ($emailTo, $action) {
-                        $message->to($emailTo)
-                                ->subject("Ventilador {$action} - Sistema IoT");
-                    }
-                );
-            }
-        } catch (\Exception $e) {
-            \Log::error('Erro ao enviar email de notificação do ventilador: ' . $e->getMessage());
-        }
+        $notificationService = app(\App\Services\NotificationService::class);
+        $notificationService->sendActuatorNotification('ventilador', $action);
     }
 
     /**

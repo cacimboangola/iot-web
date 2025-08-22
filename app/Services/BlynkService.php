@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 /**
  * Service class para centralizar todas as chamadas à API do Blynk Cloud
@@ -17,7 +17,7 @@ class BlynkService
 
     public function __construct()
     {
-        $this->baseUrl = env('BLYNK_API_URL', 'https://blynk.cloud');
+        $this->baseUrl = env('BLYNK_API_URL', 'https://blynk.cloud/external/api');
         $this->authToken = env('BLYNK_AUTH_TOKEN', 'XDMd-ylA4lL9DcNZeNhZjBgdNPZmzOSh');
     }
 
@@ -175,7 +175,7 @@ class BlynkService
      */
     public function getAllSensorData(): array
     {
-        return [
+        $data = [
             'soil_humidity' => $this->getSoilHumidity(),
             'air_temperature' => $this->getAirTemperature(),
             'air_humidity' => $this->getAirHumidity(),
@@ -185,6 +185,38 @@ class BlynkService
             'fan_status' => $this->getFanStatus(),
             'solenoid_valve_status' => $this->getSolenoidValveStatus(),
             'timestamp' => now()->toISOString(),
+        ];
+
+        // Se todos os valores são null, usa dados simulados
+        $hasValidData = collect($data)->except('timestamp')->filter()->isNotEmpty();
+
+        /*if (!$hasValidData) {
+            return $this->getSimulatedData();
+        }*/
+
+        return $data;
+    }
+
+    /**
+     * Gera dados simulados quando a API não responde
+     * @return array Array com dados simulados realistas
+     */
+    private function getSimulatedData(): array
+    {
+        $airTemp = rand(18, 35);
+        $soilHumidity = rand(20, 80);
+
+        return [
+            'soil_humidity' => $soilHumidity,
+            'air_temperature' => $airTemp,
+            'air_humidity' => rand(40, 90),
+            'luminosity' => rand(0, 100),
+            'pump_status' => $soilHumidity < 30,
+            'auto_mode_status' => (bool) rand(0, 1),
+            'fan_status' => $airTemp > 28 || rand(0, 1),
+            'solenoid_valve_status' => $soilHumidity < 40 || rand(0, 1),
+            'timestamp' => now()->toISOString(),
+            'simulated' => true,
         ];
     }
 

@@ -14,7 +14,6 @@ Route::get('/settings', SettingsPage::class)->name('settings');
 Route::prefix('api')->group(function () {
     Route::get('/sensors', function () {
         $blynkService = app(\App\Services\BlynkService::class);
-        dd($blynkService->getAllSensorData());
         return response()->json($blynkService->getAllSensorData());
     })->name('api.sensors');
 
@@ -81,4 +80,22 @@ Route::prefix('api')->group(function () {
             'new_status' => !$currentStatus
         ]);
     })->name('api.valve.toggle');
+    
+    Route::get('/test-email', function () {
+        $notificationService = app(\App\Services\NotificationService::class);
+        $success = $notificationService->testEmailConfiguration();
+        
+        return response()->json([
+            'success' => $success,
+            'message' => $success ? 'Email de teste enviado com sucesso!' : 'Erro ao enviar email de teste. Verifique as configurações.',
+            'email_config' => [
+                'mailer' => config('mail.default'),
+                'host' => config('mail.mailers.smtp.host'),
+                'port' => config('mail.mailers.smtp.port'),
+                'from' => config('mail.from.address'),
+                'notification_email' => config('irrigation.notifications.email'),
+                'notifications_enabled' => config('irrigation.notifications.enabled'),
+            ]
+        ]);
+    })->name('api.test-email');
 });
